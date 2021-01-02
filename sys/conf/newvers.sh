@@ -47,14 +47,14 @@
 # Note: usr.sbin/amd/include/newvers.sh assumes all variable assignments of
 # upper case variables starting in column 1 are on one line w/o continuation.
 
-TYPE="FreeBSD"
+TYPE="AS-BSD"
 REVISION="12.2"
-BRANCH="RELEASE-p2"
+BRANCH="p2"
 if [ -n "${BRANCH_OVERRIDE}" ]; then
 	BRANCH=${BRANCH_OVERRIDE}
 fi
 RELEASE="${REVISION}-${BRANCH}"
-VERSION="${TYPE} ${RELEASE}"
+VERSION="${TYPE} UNIX Release ${REVISION} Version ${BRANCH}"
 
 #
 # findvcs dir
@@ -210,11 +210,13 @@ if [ -n "$svnversion" ] ; then
 fi
 
 if [ -n "$git_cmd" ] ; then
-	git=`$git_cmd rev-parse --verify --short HEAD 2>/dev/null`
+#    git_b=`$git_cmd rev-parse --abbrev-ref HEAD`
+	git_c=`$git_cmd rev-parse --verify --short HEAD 2>/dev/null`
+    git="(${git_c}"
 	svn=`$git_cmd svn find-rev $git 2>/dev/null`
 	if [ -n "$svn" ] ; then
 		svn=" r${svn}"
-		git="=${git}"
+		git="=${git})"
 	else
 		svn=`$git_cmd log --grep '^git-svn-id:' | \
 		    grep '^    git-svn-id:' | head -1 | \
@@ -226,18 +228,15 @@ if [ -n "$git_cmd" ] ; then
 		fi
 		if [ -n "$svn" ] ; then
 			svn=" r${svn}"
-			git="+${git}"
+			git="+${git})"
 		else
-			git=" ${git}"
+			git=" ${git})"
 		fi
 	fi
-	git_b=`$git_cmd rev-parse --abbrev-ref HEAD`
-	if [ -n "$git_b" ] ; then
-		git="${git}(${git_b})"
-	fi
+
 	if $git_cmd --work-tree=${VCSTOP} diff-index \
 	    --name-only HEAD | read dummy; then
-		git="${git}-dirty"
+		git="${git}*)"
 		modified=true
 	fi
 fi
@@ -288,7 +287,7 @@ done
 shift $((OPTIND - 1))
 
 if [ -z "${include_metadata}" ]; then
-	VERINFO="${VERSION}${svn}${git}${hg}${p4version} ${i}"
+	VERINFO="${VERSION}${git}"
 	VERSTR="${VERINFO}\\n"
 else
 	VERINFO="${VERSION} #${v}${svn}${git}${hg}${p4version}: ${t}"

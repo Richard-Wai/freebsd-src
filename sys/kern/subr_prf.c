@@ -90,9 +90,10 @@ __FBSDID("$FreeBSD$");
 
 #ifdef _KERNEL
 
-#define TOCONS	0x01
-#define TOTTY	0x02
-#define TOLOG	0x04
+#define TOCONS	    0x01
+#define TOTTY	    0x02
+#define TOLOG	    0x04
+#define REALLY_CONS 0x08
 
 /* Max number conversion buffer length: a u_quad_t in base 2, plus NUL byte. */
 #define MAXNBUF	(sizeof(intmax_t) * NBBY + 1)
@@ -307,18 +308,34 @@ _vprintf(int level, int flags, const char *fmt, va_list ap)
 
 #ifdef PRINTF_BUFR_SIZE
 	/* Write any buffered console/log output: */
-	if (*pca.p_bufr != '\0') {
-		if (pca.flags & TOLOG)
-			msglogstr(pca.p_bufr, level, /*filter_cr*/1);
-
-		if (pca.flags & TOCONS)
-			cnputs(pca.p_bufr);
-	}
+    if (*pca.p_bufr != '\0') {
+         if (pca.flags & REALLY_CONS)
+              cnputs(pca.p_bufr);
+         else
+              msglogstr(pca.p_bufr, level, /*filter_cr*/1);
+    }
 #endif
 
 	TSEXIT();
 	return (retval);
 }
+
+
+static int
+_vprintcons(const char *fmt, va_list ap)
+{
+    /* Basically copied from vprintf below */
+     
+	int retval;
+
+	retval = _vprintf(-1, REALLY_CONS, fmt, ap);
+
+	if (!panicstr)
+		msgbuftrigger = 1;
+
+	return (retval);
+}
+
 
 /*
  * Log writes to the log buffer, and guarantees not to sleep (so can be
@@ -339,7 +356,7 @@ void
 vlog(int level, const char *fmt, va_list ap)
 {
 
-	(void)_vprintf(level, log_open ? TOLOG : TOCONS | TOLOG, fmt, ap);
+	(void)_vprintf(level, TOLOG, fmt, ap);
 	msgbuftrigger = 1;
 }
 
@@ -422,11 +439,25 @@ printf(const char *fmt, ...)
 }
 
 int
+printcons(const char *fmt, ...)
+{
+	va_list ap;
+	int retval;
+
+	va_start(ap, fmt);
+	retval = _vprintcons(fmt, ap);
+	va_end(ap);
+
+	return (retval);
+}
+
+int
 vprintf(const char *fmt, va_list ap)
 {
 	int retval;
 
-	retval = _vprintf(-1, TOCONS | TOLOG, fmt, ap);
+    /* retval = _vprintf(-1, TOCONS | TOLOG, fmt, ap); */
+	retval = _vprintf(-1, TOLOG, fmt, ap);
 
 	if (!panicstr)
 		msgbuftrigger = 1;
@@ -437,18 +468,10 @@ vprintf(const char *fmt, va_list ap)
 static void
 prf_putbuf(char *bufr, int flags, int pri)
 {
+     msglogstr(bufr, pri, /*filter_cr*/1);
 
-	if (flags & TOLOG)
-		msglogstr(bufr, pri, /*filter_cr*/1);
-
-	if (flags & TOCONS) {
-		if ((panicstr == NULL) && (constty != NULL))
-			msgbuf_addstr(&consmsgbuf, -1,
-			    bufr, /*filter_cr*/ 0);
-
-		if ((constty == NULL) ||(always_console_output))
-			cnputs(bufr);
-	}
+ 	 if (flags & REALLY_CONS)
+        cnputs(bufr);
 }
 
 static void
@@ -457,10 +480,7 @@ putbuf(int c, struct putchar_arg *ap)
 	/* Check if no console output buffer was provided. */
 	if (ap->p_bufr == NULL) {
 		/* Output direct to the console. */
-		if (ap->flags & TOCONS)
-			cnputc(c);
-
-		if (ap->flags & TOLOG)
+		if (ap->flags & (TOCONS | TOLOG))
 			msglogchar(c, ap->pri);
 	} else {
 		/* Buffer the character: */
@@ -514,7 +534,7 @@ putchar(int c, void *arg)
 	if ((flags & TOTTY) && tp != NULL && panicstr == NULL)
 		tty_putchar(tp, c);
 
-	if ((flags & (TOCONS | TOLOG)) && c != '\0')
+    if ((flags & (TOCONS | TOLOG | REALLY_CONS)) && c != '\0')
 		putbuf(c, ap);
 }
 
