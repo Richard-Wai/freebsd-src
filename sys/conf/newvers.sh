@@ -52,14 +52,14 @@
 #		like the -V command
 #
 
-TYPE="FreeBSD"
+TYPE="AS-BSD"
 REVISION="13.0"
 BRANCH="RELEASE"
 if [ -n "${BRANCH_OVERRIDE}" ]; then
 	BRANCH=${BRANCH_OVERRIDE}
 fi
 RELEASE="${REVISION}-${BRANCH}"
-VERSION="${TYPE} ${RELEASE}"
+VERSION="${TYPE} UNIX Release ${REVISION} Version ${BRANCH}"
 
 if [ -z "${SYSDIR}" ]; then
     SYSDIR=$(dirname $0)/..
