@@ -96,7 +96,6 @@ device		cpufreq
 # Bus support.
 device		acpi
 options     IOMMU
-options 	ACPI_DMAR
 device		pci
 options 	PCI_HP			# PCI-Express native HotPlug
 options		PCI_IOV			# PCI SR-IOV support
@@ -126,7 +125,6 @@ device		psm			# PS/2 mouse
 
 device		kbdmux			# keyboard multiplexer
 
-device    vga			# VGA video card driver
 nodevice    sc
 
 # vt is the new video console driver
@@ -145,7 +143,6 @@ device		crypto			# core crypto support
 device      cryptodev
 nodevice	aesni			# AES-NI OpenCrypto module
 device		loop			# Network loopback
-device		random			# Entropy device
 device		rdrand_rng		# Intel Bull Mountain RNG
 device		ether			# Ethernet support
 device		vlan			# 802.1Q VLAN support
