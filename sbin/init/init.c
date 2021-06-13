@@ -54,6 +54,7 @@ static const char rcsid[] =
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include <sys/uio.h>
+#include <sys/utsname.h>
 
 #include <db.h>
 #include <errno.h>
@@ -65,10 +66,12 @@ static const char rcsid[] =
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <syslog.h>
 #include <time.h>
 #include <ttyent.h>
 #include <unistd.h>
+#include <sys/uio.h>
 #include <sys/reboot.h>
 #include <err.h>
 

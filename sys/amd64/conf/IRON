@@ -1,6 +1,6 @@
 machine     amd64
 cpu     	HAMMER
-ident		VMWKERN
+ident		IRON
 
 #makeoptions	DEBUG=-g		# Build kernel with gdb(1) debug symbols
 #makeoptions	WITH_CTF=1		# Run ctfconvert(1) for DTrace support
@@ -40,7 +40,7 @@ options     ZFS             # ZFS in kernel - also needs ZSTDIO
 options 	GEOM_LABEL		# Provides labelization
 options     GEOM_PART_GPT
 options     GEOM_STRIPE
-options 	EFIRT			# EFI Runtime Services support
+options     GEOM_MIRROR
 options 	COMPAT_FREEBSD32	# Compatible with i386 binaries
 options 	COMPAT_FREEBSD9		# Compatible with FreeBSD9
 options 	COMPAT_FREEBSD10	# Compatible with FreeBSD10
@@ -64,7 +64,6 @@ options     MAC_NTPD
 options 	INCLUDE_CONFIG_FILE	# Include this file in kernel
 options 	RACCT			# Resource accounting framework
 options 	RACCT_DEFAULT_TO_DISABLED # Set kern.racct.enable=0 by default
-
 
 
 # Debugging support.  Always need this:
@@ -97,7 +96,7 @@ device		cpufreq
 # Bus support.
 device		acpi
 options     IOMMU
-#options 	ACPI_DMAR
+options 	ACPI_DMAR
 device		pci
 options 	PCI_HP			# PCI-Express native HotPlug
 options		PCI_IOV			# PCI SR-IOV support
@@ -108,13 +107,14 @@ device		ahci			# AHCI-compatible SATA controllers
 
 # ATA/SCSI peripherals
 device		scbus			# SCSI bus (required for ATA/SCSI)
-device      mpt             # LSI SCSI controller
+device      ata
+device      mfi             # LSI MegaRAID SAS driver
 device		da		       	# Direct Access (disks)
 device		pass			# Passthrough device (direct ATA/SCSI access)
 
 # NVM Express (NVMe) support
-device		nvme			# base NVMe driver
-device		nvd			# expose NVMe namespaces as disks, depends on nvme
+nodevice		nvme			# base NVMe driver
+nodevice		nvd			# expose NVMe namespaces as disks, depends on nvme
 
 #SCSI
 
@@ -126,8 +126,8 @@ device		psm			# PS/2 mouse
 
 device		kbdmux			# keyboard multiplexer
 
-# syscons is the default console driver, resembling an SCO console
-nodevice	sc
+device    vga			# VGA video card driver
+nodevice    sc
 
 # vt is the new video console driver
 device		vt
@@ -143,7 +143,7 @@ device		uart			# Generic UART driver
 # Pseudo devices.
 device		crypto			# core crypto support
 device      cryptodev
-device		aesni			# AES-NI OpenCrypto module
+nodevice	aesni			# AES-NI OpenCrypto module
 device		loop			# Network loopback
 device		random			# Entropy device
 device		rdrand_rng		# Intel Bull Mountain RNG
@@ -154,7 +154,6 @@ device		tuntap
 device		md			# Memory "disks"
 device		gif			# IPv6 and IPv4 tunneling
 device		firmware		# firmware assist module
-device      xz
 
 # The `bpf' device enables the Berkeley Packet Filter.
 # Be aware of the administrative consequences of enabling this!
@@ -166,7 +165,6 @@ nooptions 	USB_DEBUG		# enable debug msgs
 device		uhci			# UHCI PCI->USB interface
 nodevice	ohci			# OHCI PCI->USB interface
 device		ehci			# EHCI PCI->USB interface (USB 2.0)
-device		xhci			# XHCI PCI->USB interface (USB 3.0)
 device		usb			# USB Bus (required)
 device		ukbd			# Keyboard
 device		umass			# Disks/Mass storage - Requires scbus and da
@@ -181,15 +179,19 @@ options 	IICHID_SAMPLING		# Workaround missing GPIO INTR support
 device      ucom
 device      uftdi
 
-# VMware support
-device      iflib
-device		vmx			# VMware VMXNET3 Ethernet
+# net
+device      miibus
+device      bce
 
-device      wmt
-device      evdev
+# disks
+
+
 
 # Netmap provides direct access to TX/RX rings on supported NICs
 device		netmap			# netmap(4) support
 
 
 device      smbus
+device      smb
+device      iicbus
+device      iicsmb
