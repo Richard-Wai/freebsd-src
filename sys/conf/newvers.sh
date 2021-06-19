@@ -251,7 +251,7 @@ if [ -n "$svnversion" ] ; then
 fi
 
 if [ -n "$git_cmd" ] ; then
-	git=" ${git rev-parse --verify --short HEAD 2>/dev/null}"
+	git=" $($git_cmd rev-parse --verify --short HEAD 2>/dev/null)"
 fi
 
 if [ -n "$gituprevision" ] ; then
