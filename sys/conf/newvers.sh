@@ -272,9 +272,9 @@ fi
 
 [ ${include_metadata} = "if-modified" -a ${modified} = "yes" ] && include_metadata=yes
 if [ ${include_metadata} != "yes" ]; then
-	VERINFO="${VERSION}${git}"
-else
 	VERINFO="${VERSION}${git} (dirty)"
+else
+	VERINFO="${VERSION}${git}"
 fi
 
 VERSTR="${VERINFO}\\n"
