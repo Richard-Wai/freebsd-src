@@ -159,7 +159,7 @@ device		bpf			# Berkeley packet filter
 
 #pf
 device pf
-options PF_DEFAULT_TO_DROP
+#options PF_DEFAULT_TO_DROP
 
 # USB support
 nooptions 	USB_DEBUG		# enable debug msgs
