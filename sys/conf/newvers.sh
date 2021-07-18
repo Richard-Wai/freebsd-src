@@ -273,11 +273,11 @@ fi
 [ ${include_metadata} = "if-modified" -a ${modified} = "yes" ] && include_metadata=yes
 if [ ${include_metadata} != "yes" ]; then
 	VERINFO="${VERSION}${git}"
-	VERSTR="${VERINFO}\\n"
 else
-	VERINFO="${VERSION} #${v}${svn}${git}${hg}${p4version}: ${t}"
-	VERSTR="${VERINFO}\\n    ${u}@${h}:${d}\\n"
+	VERINFO="${VERSION}${git} (dirty)"
 fi
+
+VERSTR="${VERINFO}\\n"
 
 vers_content_new=$(cat << EOF
 $COPYRIGHT
