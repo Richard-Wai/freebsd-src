@@ -54,7 +54,8 @@
 
 TYPE="AS-BSD"
 REVISION="13.0"
-BRANCH="p3"
+BRANCH="p4"
+
 if [ -n "${BRANCH_OVERRIDE}" ]; then
 	BRANCH=${BRANCH_OVERRIDE}
 fi
