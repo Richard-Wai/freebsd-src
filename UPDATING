@@ -11,6 +11,48 @@ handbook:
 Items affecting the ports and packages system can be found in
 /usr/ports/UPDATING.  Please read that file before running portupgrade.
 
+20220315:
+	13.0-RELEASE-p8	FreeBSD-EN-22:10.zfs
+			FreeBSD-EN-22:11.zfs
+			FreeBSD-EN-22:12.zfs
+			FreeBSD-SA-22:02.wifi
+			FreeBSD-SA-22:03.openssl
+
+	ZFS writes fail to update file size [FreeBSD-EN-22:10.zfs]
+
+	ZFS lseek(2) inconsistencies [FreeBSD-EN-22:11.zfs]
+
+	ZFS panic upon concurrent 'zfs list' calls [FreeBSD-EN-22:12.zfs]
+
+	Multiple WiFi issues [FreeBSD-SA-22:02.wifi]
+
+	OpenSSL certificate parsing infinite loop [FreeBSD-SA-22:03.openssl]
+
+20220201:
+	13.0-RELEASE-p7 FreeBSD-EN-22:07.la57
+
+	Fix Intel CPU LA57 boot failure [EN-22:07.la57]
+
+20220111:
+	13.0-RELEASE-p6	FreeBSD-EN-22:01.fsck_ffs
+			FreeBSD-EN-22:02.xsave
+			FreeBSD-EN-22:03.hyperv
+			FreeBSD-EN-22:05.tail
+			FreeBSD-EN-22:06.libalias
+			FreeBSD-SA-22:01.vt
+
+	Fix fsck_ffs bad inode number errors [EN-22:01.fsck_ffs]
+
+	Correct size of the amd64 SSE area in the xsave layout [FreeBSD-EN-22:02.xsave]
+
+	Prepopulate Hyper-V PCI device bars [FreeBSD-EN-22:03.hyperv]
+
+	Fix "tail -F" file rotation detection [FreeBSD-EN-22:05.tail]
+
+	Fix fragmented UDP packets handling [FreeBSD-EN-22:06.libalias]
+
+	Fix vt console buffer overflow [FreeBSD-SA-22:01.vt]
+
 20211103:
 	13.0-RELEASE-p5	FreeBSD-EN-21:26.libevent
 			FreeBSD-EN-21:27.caroot
