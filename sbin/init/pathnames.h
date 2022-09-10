@@ -40,6 +40,7 @@
 #define	_PATH_INITLOG		"/var/log/init.log"
 #define	_PATH_SLOGGER		"/sbin/session_logger"
 #define	_PATH_RUNCOM		"/etc/rc"
+#define _PATH_RC_CONF       "/etc/rc.conf"
 #define	_PATH_RUNDOWN		"/etc/rc.shutdown"
 #define	_PATH_RUNFINAL		"/etc/rc.final"
 #define	_PATH_REROOT		"/dev/reroot"

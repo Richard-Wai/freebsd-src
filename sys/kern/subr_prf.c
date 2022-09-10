@@ -92,9 +92,10 @@ __FBSDID("$FreeBSD$");
 
 #ifdef _KERNEL
 
-#define TOCONS	0x01
-#define TOTTY	0x02
-#define TOLOG	0x04
+#define TOCONS	    0x01
+#define TOTTY	    0x02
+#define TOLOG	    0x04
+#define REALLY_CONS 0x08
 
 /* Max number conversion buffer length: a u_quad_t in base 2, plus NUL byte. */
 #define MAXNBUF	(sizeof(intmax_t) * NBBY + 1)
@@ -305,6 +306,23 @@ _vprintf(int level, int flags, const char *fmt, va_list ap)
 	return (retval);
 }
 
+
+static int
+_vprintcons(const char *fmt, va_list ap)
+{
+    /* Basically copied from vprintf below */
+     
+	int retval;
+
+	retval = _vprintf(-1, REALLY_CONS, fmt, ap);
+
+	if (!KERNEL_PANICKED())
+		msgbuftrigger = 1;
+
+	return (retval);
+}
+
+
 /*
  * Log writes to the log buffer, and guarantees not to sleep (so can be
  * called by interrupt routines).  If there is no process reading the
@@ -324,7 +342,7 @@ void
 vlog(int level, const char *fmt, va_list ap)
 {
 
-	(void)_vprintf(level, log_open ? TOLOG : TOCONS | TOLOG, fmt, ap);
+	(void)_vprintf(level, TOLOG, fmt, ap);
 	msgbuftrigger = 1;
 }
 
@@ -407,6 +425,19 @@ printf(const char *fmt, ...)
 }
 
 int
+printcons(const char *fmt, ...)
+{
+	va_list ap;
+	int retval;
+
+	va_start(ap, fmt);
+	retval = _vprintcons(fmt, ap);
+	va_end(ap);
+
+	return (retval);
+}
+
+int
 vprintf(const char *fmt, va_list ap)
 {
 	int retval;
@@ -422,34 +453,22 @@ vprintf(const char *fmt, va_list ap)
 static void
 prf_putchar(int c, int flags, int pri)
 {
+    msglogchar(c, pri);
 
-	if (flags & TOLOG)
-		msglogchar(c, pri);
-
-	if (flags & TOCONS) {
-		if ((!KERNEL_PANICKED()) && (constty != NULL))
-			msgbuf_addchar(&consmsgbuf, c);
-
-		if ((constty == NULL) || always_console_output)
-			cnputc(c);
-	}
+    if (flags & REALLY_CONS)
+        cnputc(c);
+    
 }
 
 static void
 prf_putbuf(char *bufr, int flags, int pri)
 {
 
-	if (flags & TOLOG)
-		msglogstr(bufr, pri, /*filter_cr*/1);
+    msglogstr(bufr, pri, /*filter_cr*/1);
 
-	if (flags & TOCONS) {
-		if ((!KERNEL_PANICKED()) && (constty != NULL))
-			msgbuf_addstr(&consmsgbuf, -1,
-			    bufr, /*filter_cr*/ 0);
+    if (flags & REALLY_CONS)
+        cnputs(bufr);
 
-		if ((constty == NULL) || always_console_output)
-			cnputs(bufr);
-	}
 }
 
 static void

@@ -273,7 +273,8 @@ cpu_startup(dummy)
 	}
 	if (memsize < ptoa((uintmax_t)vm_free_count()))
 		memsize = ptoa((uintmax_t)Maxmem);
-	printf("real memory  = %ju (%ju MB)\n", memsize, memsize >> 20);
+	printcons("Total real memory  =  %ju (%ju MB)\n",
+              memsize, memsize >> 20);
 	realmem = atop(memsize);
 
 	/*
@@ -297,7 +298,7 @@ cpu_startup(dummy)
 
 	vm_ksubmap_init(&kmi);
 
-	printf("avail memory = %ju (%ju MB)\n",
+	printcons("Available  memory  =  %ju (%ju MB)\n",
 	    ptoa((uintmax_t)vm_free_count()),
 	    ptoa((uintmax_t)vm_free_count()) / 1048576);
 #ifdef DEV_PCI

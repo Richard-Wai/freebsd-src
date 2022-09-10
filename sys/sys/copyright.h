@@ -29,7 +29,7 @@
 
 /* Add a FreeBSD vendor copyright here */
 #define	COPYRIGHT_Vendor \
-	""
+	"Copyright (c) 2019-2021 ANNEXI-STRAYLINE Trans-Human Ltd.\n"
 
 /* FreeBSD */
 #define COPYRIGHT_FreeBSD \
@@ -37,7 +37,7 @@
 
 /* Foundation */
 #define	TRADEMARK_Foundation \
-	"FreeBSD is a registered trademark of The FreeBSD Foundation.\n"
+	"FreeBSD is a registered trademark of The FreeBSD Foundation.\n\n"
 
 /* Berkeley */
 #define COPYRIGHT_UCB \

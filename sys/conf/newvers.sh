@@ -52,14 +52,14 @@
 #		like the -V command
 #
 
-TYPE="FreeBSD"
+TYPE="AS-BSD"
 REVISION="13.1"
 BRANCH="RELEASE"
 if [ -n "${BRANCH_OVERRIDE}" ]; then
 	BRANCH=${BRANCH_OVERRIDE}
 fi
 RELEASE="${REVISION}-${BRANCH}"
-VERSION="${TYPE} ${RELEASE}"
+VERSION="${TYPE} UNIX Release ${REVISION} Version ${BRANCH}"
 
 if [ -z "${SYSDIR}" ]; then
     SYSDIR=$(dirname $0)/..
@@ -251,22 +251,7 @@ if [ -n "$svnversion" ] ; then
 fi
 
 if [ -n "$git_cmd" ] ; then
-	git=$($git_cmd rev-parse --verify --short HEAD 2>/dev/null)
-	if [ "$($git_cmd rev-parse --is-shallow-repository)" = false ] ; then
-		git_cnt=$($git_cmd rev-list --first-parent --count HEAD 2>/dev/null)
-		if [ -n "$git_cnt" ] ; then
-			git="n${git_cnt}-${git}"
-		fi
-	fi
-	git_b=$($git_cmd rev-parse --abbrev-ref HEAD)
-	if [ -n "$git_b" -a "$git_b" != "HEAD" ] ; then
-		git="${git_b}-${git}"
-	fi
-	if git_tree_modified; then
-		git="${git}-dirty"
-		modified=yes
-	fi
-	git=" ${git}"
+	git=" $($git_cmd rev-parse --verify --short HEAD 2>/dev/null)"
 fi
 
 if [ -n "$gituprevision" ] ; then
@@ -287,12 +272,12 @@ fi
 
 [ ${include_metadata} = "if-modified" -a ${modified} = "yes" ] && include_metadata=yes
 if [ ${include_metadata} != "yes" ]; then
-	VERINFO="${VERSION}${svn}${git}${gitup}${hg} ${i}"
-	VERSTR="${VERINFO}\\n"
+	VERINFO="${VERSION}${git} (dirty)"
 else
-	VERINFO="${VERSION} #${v}${svn}${git}${gitup}${hg}: ${t}"
-	VERSTR="${VERINFO}\\n    ${u}@${h}:${d}\\n"
+	VERINFO="${VERSION}${git}"
 fi
+
+VERSTR="${VERINFO}\\n"
 
 vers_content_new=$(cat << EOF
 $COPYRIGHT
@@ -311,7 +296,7 @@ EOF
 )
 vers_content_old=$(cat vers.c 2>/dev/null || true)
 if [ "$vers_content_new" != "$vers_content_old" ]; then
-	printf "%s\n" "$vers_content_new" > vers.c
+	printf "%s" "$vers_content_new" > vers.c
 fi
 
 echo $((v + 1)) > version
