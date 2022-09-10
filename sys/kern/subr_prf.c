@@ -529,7 +529,7 @@ putchar(int c, void *arg)
 	if ((flags & TOTTY) && tp != NULL && !KERNEL_PANICKED())
 		tty_putchar(tp, c);
 
-	if ((flags & (TOCONS | TOLOG)) && c != '\0')
+	if ((flags & (TOCONS | TOLOG | REALLY_CONS)) && c != '\0')
 		putbuf(c, ap);
 }
 
