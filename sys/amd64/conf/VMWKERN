@@ -20,6 +20,7 @@ options 	TCP_OFFLOAD		# TCP offload
 options 	TCP_BLACKBOX		# Enhanced TCP event logging
 options 	TCP_HHOOK		# hhook(9) framework for TCP
 options		TCP_RFC7413		# TCP Fast Open
+options     SCTP
 options 	SCTP_SUPPORT		# Allow kldload of SCTP
 options		KERN_TLS		# TLS transmit & receive offload
 options 	FFS			# Berkeley Fast Filesystem
@@ -63,9 +64,6 @@ options 	MAC			# TrustedBSD MAC Framework
 options     MAC_NTPD
 
 options 	INCLUDE_CONFIG_FILE	# Include this file in kernel
-options 	RACCT			# Resource accounting framework
-options 	RACCT_DEFAULT_TO_DISABLED # Set kern.racct.enable=0 by default
-
 
 
 # Debugging support.  Always need this:
@@ -152,6 +150,7 @@ device		loop			# Network loopback
 device		rdrand_rng		# Intel Bull Mountain RNG
 device		ether			# Ethernet support
 device		vlan			# 802.1Q VLAN support
+device      vxlan           # vxlan interface support
 device      if_bridge       # bridge device
 device		tuntap
 device		md			# Memory "disks"
@@ -164,6 +163,10 @@ device      xz
 # Be aware of the administrative consequences of enabling this!
 # Note that 'bpf' is required for DHCP.
 device		bpf			# Berkeley packet filter
+
+#pf
+device pf
+#options PF_DEFAULT_TO_DROP
 
 # USB support
 nooptions 	USB_DEBUG		# enable debug msgs
@@ -197,3 +200,4 @@ device		netmap			# netmap(4) support
 
 
 device      smbus
+device      smb

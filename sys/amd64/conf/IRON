@@ -14,13 +14,15 @@ options 	PREEMPTION		# Enable kernel thread preemption
 options 	VIMAGE			# Subsystem virtualization, e.g. VNET
 options 	INET			# InterNETworking
 options 	INET6			# IPv6 communications protocols
+options		ROUTE_MPATH		# Multipath routing support
 options 	TCP_OFFLOAD		# TCP offload
 options 	TCP_BLACKBOX		# Enhanced TCP event logging
 options 	TCP_HHOOK		# hhook(9) framework for TCP
 options		TCP_RFC7413		# TCP Fast Open
 options 	SCTP			# Stream Control Transmission Protocol
+options 	SCTP_SUPPORT    # Allow kldload of SCTP
 options     KERN_TLS
-options 	FFS			# Berkeley Fast Filesystem
+options 	FFS             # Berkeley Fast Filesystem
 options 	SOFTUPDATES		# Enable FFS soft updates support
 options 	UFS_ACL			# Support for access control lists
 options 	UFS_DIRHASH		# Improve performance on big directories
@@ -62,8 +64,6 @@ options 	MAC			# TrustedBSD MAC Framework
 options     MAC_NTPD
 
 options 	INCLUDE_CONFIG_FILE	# Include this file in kernel
-options 	RACCT			# Resource accounting framework
-options 	RACCT_DEFAULT_TO_DISABLED # Set kern.racct.enable=0 by default
 
 
 # Debugging support.  Always need this:
@@ -125,7 +125,8 @@ device		psm			# PS/2 mouse
 
 device		kbdmux			# keyboard multiplexer
 
-nodevice    sc
+# syscons is the default console driver, resembling an SCO console
+nodevice	sc
 
 # vt is the new video console driver
 device		vt
@@ -141,11 +142,12 @@ device		uart			# Generic UART driver
 # Pseudo devices.
 device		crypto			# core crypto support
 device      cryptodev
-nodevice	aesni			# AES-NI OpenCrypto module
+device		aesni			# AES-NI OpenCrypto module
 device		loop			# Network loopback
 device		rdrand_rng		# Intel Bull Mountain RNG
 device		ether			# Ethernet support
 device		vlan			# 802.1Q VLAN support
+device      vxlan           # vxlan interface support
 device      if_bridge       # bridge device
 device		tuntap
 device		md			# Memory "disks"
