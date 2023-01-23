@@ -12,6 +12,7 @@ options 	BOOT_TAG_SZ=0
 #options    MD_ROOT_READONLY  
 #options    ROOTDEVNAME=\"ufs:md0\"
 
+
 options 	SCHED_ULE		# ULE scheduler
 options 	NUMA			# Non-Uniform Memory Architecture support
 options 	PREEMPTION		# Enable kernel thread preemption
@@ -41,7 +42,6 @@ options 	CD9660			# ISO 9660 Filesystem
 options 	PROCFS			# Process filesystem (requires PSEUDOFS)
 options 	PSEUDOFS		# Pseudo-filesystem framework
 options 	TMPFS			# Efficient memory filesystem
-options     ZFS             # ZFS in kernel - also needs ZSTDIO
 options 	GEOM_LABEL		# Provides labelization
 options     GEOM_PART_GPT
 options     GEOM_STRIPE

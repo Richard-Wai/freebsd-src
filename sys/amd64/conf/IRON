@@ -135,6 +135,8 @@ device      vt_vga
 device		vga             # VGA video card driver (bios boot)
 nooptions 	VESA			# Add support for VESA BIOS Extensions (VBE)
 nodevice    splash
+options     SC_NO_CUTPASTE  # Disable vt mouse support
+options     VT_MAXWINDOWS=2 # Only allocate two vt's
 
 # Serial (COM) ports
 device		uart			# Generic UART driver
