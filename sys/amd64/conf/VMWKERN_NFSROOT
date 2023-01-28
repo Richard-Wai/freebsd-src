@@ -12,8 +12,7 @@ options 	MD_ROOT			 # MD is a potential root device
 #options    MD_ROOT_READONLY
 options     BOOTP
 options     BOOTP_NFSROOT
-options     BOOTP_COMPAT
-options     NFS_NFSV3
+options     BOOTP_NFSV3
 options     NFS_ROOT
 #options    ROOTDEVNAME=\"ufs:md0\"
 
