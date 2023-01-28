@@ -1,6 +1,6 @@
 machine     amd64
 cpu     	HAMMER
-ident		VMWKERN
+ident		VMWKERN_NFSROOT
 
 #makeoptions	DEBUG=-g		# Build kernel with gdb(1) debug symbols
 #makeoptions	WITH_CTF=1		# Run ctfconvert(1) for DTrace support
@@ -8,8 +8,13 @@ ident		VMWKERN
 options 	BOOT_TAG=\"\"
 options 	BOOT_TAG_SZ=0
 
-#options 	MD_ROOT			 # MD is a potential root device
-#options    MD_ROOT_READONLY  
+options 	MD_ROOT			 # MD is a potential root device
+#options    MD_ROOT_READONLY
+options     BOOTP
+options     BOOTP_NFSROOT
+options     BOOTP_COMPAT
+options     NFS_NFSV3
+options     NFS_ROOT
 #options    ROOTDEVNAME=\"ufs:md0\"
 
 
@@ -35,7 +40,7 @@ options 	UFS_DIRHASH		# Improve performance on big directories
 options 	UFS_GJOURNAL		# Enable gjournal-based UFS journaling
 options 	QUOTA			# Enable disk quotas for UFS
 options 	NFSCL			# Network Filesystem Client
-options 	NFSD			# Network Filesystem Server
+#options 	NFSD			# Network Filesystem Server
 options 	NFSLOCKD		# Network Lock Manager
 options 	MSDOSFS			# MSDOS Filesystem
 options 	CD9660			# ISO 9660 Filesystem
@@ -141,7 +146,7 @@ device		vga             # VGA video card driver (bios boot)
 nooptions 	VESA			# Add support for VESA BIOS Extensions (VBE)
 nodevice    splash
 options     SC_NO_CUTPASTE  # Disable vt mouse support
-options     VT_MAXWINDOWS=2 # Only allocate two vt's
+options     VT_MAXWINDOWS=3 # Only allocate four vt's
 
 # Serial (COM) ports
 device		uart			# Generic UART driver
