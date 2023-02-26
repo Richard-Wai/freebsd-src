@@ -150,8 +150,10 @@ device		ether			# Ethernet support
 device		vlan			# 802.1Q VLAN support
 device      if_bridge       # bridge device
 device		tuntap
-device		md			# Memory "disks"
-device		gif			# IPv6 and IPv4 tunneling
+device		md          	# Memory "disks"
+device		gif		    	# IPv6 and IPv4 tunneling
+device      gre             # GRE tunneling
+device      enc             # IPSEC filtering
 device		firmware		# firmware assist module
 device      xz
 
