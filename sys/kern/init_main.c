@@ -351,7 +351,7 @@ mi_startup(void)
 static void
 print_caddr_t(const void *data)
 {
-	printf("%s", (const char *)data);
+	printcons("%s", (const char *)data);
 }
 
 static void
@@ -363,15 +363,13 @@ print_version(const void *data __unused)
 	len = strlen(version);
 	while (len > 0 && version[len - 1] == '\n')
 		len--;
-	printf("%.*s %s\n", len, version, machine);
+    printcons("\n\n%.*s %s/%s\n\n", len, version, machine, kern_ident);
 	printf("%s\n", compiler_version);
 }
 
+C_SYSINIT(version, SI_SUB_OSVERSION, SI_ORDER_FIRST, print_version, NULL);
 C_SYSINIT(announce, SI_SUB_COPYRIGHT, SI_ORDER_FIRST, print_caddr_t,
     copyright);
-C_SYSINIT(trademark, SI_SUB_COPYRIGHT, SI_ORDER_SECOND, print_caddr_t,
-    trademark);
-C_SYSINIT(version, SI_SUB_COPYRIGHT, SI_ORDER_THIRD, print_version, NULL);
 
 #ifdef WITNESS
 static const char wit_warn[] =
