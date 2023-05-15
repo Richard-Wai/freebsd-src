@@ -28,10 +28,9 @@
 /* Copyrights macros  */
 
 /* Add a FreeBSD vendor copyright here - or via CFLAGS */
-#ifndef COPYRIGHT_Vendor
+
 #define	COPYRIGHT_Vendor \
-	""
-#endif
+	"Copyright (c) 2019-2024 ANNEXI-STRAYLINE Inc.\n"
 
 /* FreeBSD */
 #define COPYRIGHT_FreeBSD \
@@ -39,7 +38,7 @@
 
 /* Foundation */
 #define	TRADEMARK_Foundation \
-	"FreeBSD is a registered trademark of The FreeBSD Foundation.\n"
+	"FreeBSD is a registered trademark of The FreeBSD Foundation.\n\n"
 
 /* Berkeley */
 #define COPYRIGHT_UCB \

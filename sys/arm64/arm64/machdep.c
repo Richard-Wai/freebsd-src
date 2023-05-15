@@ -211,7 +211,7 @@ cpu_startup(void *dummy)
 	vm_paddr_t size;
 	int i;
 
-	printf("real memory  = %ju (%ju MB)\n", ptoa((uintmax_t)realmem),
+	printcons("Total real memory  = %ju (%ju MB)\n", ptoa((uintmax_t)realmem),
 	    ptoa((uintmax_t)realmem) / 1024 / 1024);
 
 	if (bootverbose) {
@@ -225,7 +225,7 @@ cpu_startup(void *dummy)
 		}
 	}
 
-	printf("avail memory = %ju (%ju MB)\n",
+	printcons("Available  memory  = %ju (%ju MB)\n",
 	    ptoa((uintmax_t)vm_free_count()),
 	    ptoa((uintmax_t)vm_free_count()) / 1024 / 1024);
 

@@ -56,6 +56,7 @@ static const char rcsid[] =
 #include <sys/sysctl.h>
 #include <sys/uio.h>
 #include <sys/wait.h>
+#include <sys/utsname.h>
 
 #include <db.h>
 #include <err.h>
@@ -70,6 +71,7 @@ static const char rcsid[] =
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <syslog.h>
 #include <time.h>
 #include <ttyent.h>
@@ -136,7 +138,9 @@ static state_func_t run_script(const char *);
 
 static enum { AUTOBOOT, FASTBOOT } runcom_mode = AUTOBOOT;
 
+static bool already_up = false;
 static bool Reboot = false;
+
 static int howto = RB_AUTOBOOT;
 
 static bool devfs = false;
@@ -147,6 +151,7 @@ static state_t requested_transition;
 static state_t current_state = death_single;
 
 static void execute_script(char *argv[]);
+static void stdio_is_log(void);
 static void open_console(void);
 static const char *get_shell(void);
 static void replace_init(char *path);
@@ -205,7 +210,7 @@ main(int argc, char *argv[])
 {
 	state_t initial_transition = runcom;
 	char kenv_value[PATH_MAX];
-	int c, error;
+	int c, error, cons;
 	struct sigaction sa;
 	sigset_t mask;
 
@@ -255,6 +260,10 @@ invalid:
 #endif
 			errx(1, "already running");
 	}
+
+	/* We are definitely PID 1 now */
+
+
 
 	init_path_argv0 = strdup(argv[0]);
 	if (init_path_argv0 == NULL)
@@ -331,6 +340,21 @@ invalid:
 	close(0);
 	close(1);
 	close(2);
+
+    /* Begin classic SVR 4 Style hack */
+	/* Open console for "normal" messages. The kernel is no longer printing   */
+	/* to the console, and we also want the rc scripts to do the same	      */
+    /* We do this here so that warn, emerge, et all will print to the console */
+
+	revoke(_PATH_CONSOLE);
+	if ((cons = open(_PATH_CONSOLE, O_RDWR | O_NONBLOCK)) != -1)
+	{
+		(void)fcntl(cons, F_SETFL, fcntl(cons, F_GETFL) & ~O_NONBLOCK);
+		dup2(cons, STDOUT_FILENO);
+		close(cons);
+	}
+
+    /* End style hack */
 
 	if (kenv(KENV_GET, "init_exec", kenv_value, sizeof(kenv_value)) > 0) {
 		replace_init(kenv_value);
@@ -489,6 +513,9 @@ warning(const char *message, ...)
 	va_list ap;
 	va_start(ap, message);
 
+	if (getpid() == 1)
+		 printf ("warning: %s\n", message);
+	
 	vsyslog(LOG_ALERT, message, ap);
 	va_end(ap);
 }
@@ -503,6 +530,9 @@ emergency(const char *message, ...)
 	va_list ap;
 	va_start(ap, message);
 
+	if (getpid() == 1)
+		 printf ("EMERGENCY: %s\n", message);
+	
 	vsyslog(LOG_EMERG, message, ap);
 	va_end(ap);
 }
@@ -582,6 +612,34 @@ transition(state_t s)
 	current_state = s;
 	for (;;)
 		current_state = (state_t) (*current_state)();
+}
+
+/*
+ * For every fork that is not a shell, this keeps the output from
+ * the console, forcing it to the log only.
+ */
+static void
+stdio_is_log(void)
+{
+	int fd;
+
+	/* Log output to file if possible. */
+	if ((fd = open(_PATH_DEVNULL, O_RDWR)) == -1) {
+		stall("cannot open null device.");
+		_exit(1);
+	}
+	if (fd != STDIN_FILENO) {
+		dup2(fd, STDIN_FILENO);
+		close(fd);
+	}
+	fd = open(_PATH_INITLOG, O_WRONLY | O_APPEND | O_CREAT, 0644);
+	if (fd == -1)
+		dup2(STDIN_FILENO, STDOUT_FILENO);
+	else if (fd != STDOUT_FILENO) {
+		dup2(fd, STDOUT_FILENO);
+		close(fd);
+	}
+	dup2(STDOUT_FILENO, STDERR_FILENO);
 }
 
 /*
@@ -891,6 +949,8 @@ single_user(void)
 	}
 
 	BOOTTRACE("going to single user mode");
+    printf ("Going single user.  Please wait.");
+
 	shell = get_shell();
 
 	if ((pid = fork()) == 0) {
@@ -1024,6 +1084,126 @@ single_user(void)
 	return (state_func_t) runcom;
 }
 
+/* Attempt to load the hostname from rc.conf, if possible */
+static void load_host_name ( char * host_name, size_t len )
+{
+     int     match_to = -1;
+     int     mark = 0;
+     int     tail;
+     int     rc_conf_fd;
+     ssize_t read_in;
+     
+     struct iovec host_name_io = { .iov_base = (void *)host_name,
+                                   .iov_len  = len };
+
+     const char host_name_key[10] = "hostname=";
+
+     if ( len < 1 ) return;
+     
+     host_name[0] = '\0';
+     rc_conf_fd = open ( _PATH_RC_CONF, O_RDONLY );
+
+     if (rc_conf_fd < 0) return;
+     
+     /* First try to find host_name_key */
+     
+     do {
+          /* mark is always zero at this point */
+
+          read_in = readv ( rc_conf_fd, &host_name_io, 1 );
+          if (read_in < 1) break;
+          
+          for ( mark = 0;
+                (mark < (read_in - 1))
+                     && (match_to < (int)(sizeof(host_name_key) - 2));
+                mark++ )
+          {
+               
+               host_name[mark] = (char)tolower (host_name[mark]);
+
+               if (host_name[mark] == host_name_key[match_to + 1])
+                    match_to++;
+               else
+                    match_to = -1;
+          }
+
+     } while (match_to < (int)(sizeof(host_name_key) - 2));
+
+     if (match_to < (int)(sizeof(host_name_key) - 2)) {
+          /* no luck */
+          close ( rc_conf_fd );
+          return;
+     }
+
+     /* mark points one past the '=' in the buffer, which should be '"' */
+     /* Reload if it is a perfect hit */
+
+     if ((size_t)mark == len) {
+          mark = 0;
+          read_in = readv ( rc_conf_fd, &host_name_io, 1 );
+
+          if (read_in < 1) {
+               /* Obviously wrong */
+               host_name[0] = '\0';
+               close ( rc_conf_fd );
+               return;
+          }
+     }
+
+     if (host_name[mark] != '"') {
+          host_name[0] = '\0';
+          close ( rc_conf_fd );
+          return;
+     }
+
+     if ((size_t)mark == len - 1) {
+          /* Corner case. This means '"' is at the end of the buffer */
+          /* reload. */
+          
+          read_in = readv ( rc_conf_fd, &host_name_io, 1 );
+
+          if (read_in < 1) {
+               /* Obviously wrong */
+               host_name[0] = '\0';
+               close ( rc_conf_fd );
+               return;
+          }
+     } else {
+          /* shift everything past mark to be at [0] and on, and then */
+          /* refill the buffer */
+          
+          for ( int i = 0; (mark + 1 + i) < (int)len; i++ ) {
+               tail = i + 1;
+               host_name[i] = host_name[mark + 1 + i];
+          }
+
+          /* Top-up buffer */
+          host_name_io.iov_base = (void *)&host_name[tail];
+          host_name_io.iov_len  = len - (size_t)tail;
+          read_in = readv ( rc_conf_fd, &host_name_io, 1 );
+          
+     }
+
+     /* Now we just scan for '"' and replace it with a \0. If we find */
+     /* anything weird on the way, we throw the baby out with the     */
+     /* bathwater. */
+
+     for ( int i = 0; i < (int)len; i++ ) {
+          if (host_name[i] == '"') {
+               host_name[i] = '\0';
+               return;
+          } else if (!isgraph( host_name[i] )) {
+               break;
+          }
+     }
+          
+     /* this is no good, it looks like the name never ended, or had something */
+     /* unusual in it. */
+     host_name[0] = '\0';
+     close ( rc_conf_fd );
+     return;
+}
+
 /*
  * Run the system startup script.
  */
@@ -1033,6 +1213,33 @@ runcom(void)
 	state_func_t next_transition;
 
 	BOOTTRACE("/etc/rc starting...");
+
+	/* Begin classic SVR 4 Style hack */
+	/* Open console for "normal" messages. The kernel is no longer printing */
+	/* to the console, and we also want the rc scripts to do the same		*/
+
+    /* Attempt to get the host name first, either from kenv, or if we can,  */
+    /* from /etc/rc.conf. If we can't, that's fine - this is just for fun.  */
+
+    char host_name[PATH_MAX];
+    /* reuse path max, why not - this is a hack afterall.. */
+
+    host_name[0] = '\0';
+
+    if (kenv(KENV_GET, "dhcp.host-name", host_name, sizeof(host_name)) < 1) {
+         /* No kenv hostname set, let's try rc.conf */
+         load_host_name ( host_name, sizeof(host_name) );
+    }
+
+    printf ("\n");
+    
+    if ( strnlen ( host_name, sizeof(host_name) ) > 0 )
+         printf ("Node: %s\n", host_name);
+
+	printf ("The system is coming up.  Please wait.\n");
+
+    /* End style hack */
+
 	if ((next_transition = run_script(_PATH_RUNCOM)) != NULL)
 		return next_transition;
 	BOOTTRACE("/etc/rc finished");
@@ -1055,7 +1262,7 @@ execute_script(char *argv[])
 	sigaction(SIGTSTP, &sa, NULL);
 	sigaction(SIGHUP, &sa, NULL);
 
-	open_console();
+	stdio_is_log();
 
 	sigprocmask(SIG_SETMASK, &sa.sa_mask, NULL);
 #ifdef LOGIN_CAP
@@ -1175,6 +1382,8 @@ run_script(const char *script)
 		/* /etc/rc executed /sbin/reboot; wait for the end quietly */
 		sigset_t s;
 
+        printf ("The system is coming down.  Please wait.\n");
+        
 		sigfillset(&s);
 		for (;;)
 			sigsuspend(&s);
@@ -1710,6 +1919,33 @@ transition_handler(int sig)
 	}
 }
 
+/* Multiuser welcome */
+static void
+multi_welcome(void)
+{
+     struct utsname sys;
+     
+     if (already_up)
+          return;
+
+     already_up = true;
+
+     uname (&sys);
+
+     /* Chop the release to just the version */
+     for ( int i = 0; i < (int)sizeof(sys.release); i++ )
+          if (sys.release[i] == '-')
+               sys.release[i] = '\0';
+     
+     printf ("The system is ready.\n\n\n");
+     
+     printf ("Welcome to AS-BSD UNIX Release %s (%s)\n", sys.release, sys.machine);
+
+     if (strnlen (sys.nodename, SYS_NMLN) > 0)
+          printf ("System name: %s\n", sys.nodename);
+
+}
+
 /*
  * Take the system multiuser.
  */
@@ -1751,6 +1987,10 @@ multi_user(void)
 		/* This marks the change from boot-time tracing to run-time. */
 		RUNTRACE("multi-user start");
 	}
+
+    multi_welcome();
+    
+
 	while (!requested_transition)
 		if ((pid = waitpid(-1, (int *) 0, 0)) != -1)
 			collect_child(pid);
@@ -1970,7 +2210,8 @@ runshutdown(void)
 	struct stat sb;
 
 	BOOTTRACE("init(8): start rc.shutdown");
-
+    printf ("The system is coming down.  Please wait.\n");
+    
 	/*
 	 * rc.shutdown is optional, so to prevent any unnecessary
 	 * complaints from the shell we simply don't run it if the
