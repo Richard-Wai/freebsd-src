@@ -2710,7 +2710,8 @@ sched_sync(void)
 		if (syncer_state != SYNCER_RUNNING &&
 		    starttime != time_uptime) {
 			if (first_printf) {
-				printf("\nSyncing disks, vnodes remaining... ");
+				printcons("\nSyncing file systems... ");
+                printf ("vnodes remaining: ");
 				first_printf = 0;
 			}
 			printf("%d ", net_worklist_len);
@@ -2851,6 +2852,8 @@ syncer_shutdown(void *arg, int howto)
 	mtx_unlock(&sync_mtx);
 	cv_broadcast(&sync_wakeup);
 	kproc_shutdown(arg, howto);
+
+    printcons ("done.\n");
 }
 
 void

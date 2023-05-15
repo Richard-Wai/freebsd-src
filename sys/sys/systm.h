@@ -211,6 +211,7 @@ void	vlog(int, const char *, __va_list) __printflike(2, 0);
 int	asprintf(char **ret, struct malloc_type *mtp, const char *format, 
 	    ...) __printflike(3, 4);
 int	printf(const char *, ...) __printflike(1, 2);
+int printcons(const char *, ...) __printflike(1, 2);
 int	snprintf(char *, size_t, const char *, ...) __printflike(3, 4);
 int	sprintf(char *buf, const char *, ...) __printflike(2, 3);
 int	uprintf(const char *, ...) __printflike(1, 2);
