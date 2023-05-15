@@ -51,14 +51,15 @@
 #		like the -V command
 #
 
-TYPE="FreeBSD"
+TYPE="AS-BSD"
 REVISION="14.3"
 BRANCH="RELEASE-p1"
+
 if [ -n "${BRANCH_OVERRIDE}" ]; then
 	BRANCH=${BRANCH_OVERRIDE}
 fi
-unset RELEASE
-unset VERSION
+RELEASE="${REVISION}-${BRANCH}"
+VERSION="${TYPE} UNIX Release ${REVISION} Version ${BRANCH}"
 
 if [ -z "${SYSDIR}" ]; then
 	SYSDIR=$(dirname $0)/..
@@ -257,6 +258,7 @@ if [ -n "$svnversion" ] ; then
 fi
 
 if [ -n "$git_cmd" ] ; then
+<<<<<<< HEAD
 	git=$($git_cmd rev-parse --verify --short=12 HEAD 2>/dev/null)
 	if [ "$($git_cmd rev-parse --is-shallow-repository)" = false ] ; then
 		git_cnt=$($git_cmd rev-list --first-parent --count HEAD 2>/dev/null)
@@ -273,6 +275,9 @@ if [ -n "$git_cmd" ] ; then
 		modified=yes
 	fi
 	git=" ${git}"
+=======
+	git=" $($git_cmd rev-parse --verify --short HEAD 2>/dev/null)"
+>>>>>>> 957cb7dc62e4 (AS-BSD Patch - release 14.2)
 fi
 
 if [ -n "$gituprevision" ] ; then
@@ -293,12 +298,12 @@ fi
 
 [ ${include_metadata} = "if-modified" -a ${modified} = "yes" ] && include_metadata=yes
 if [ ${include_metadata} != "yes" ]; then
-	VERINFO="${VERSION}${svn}${git}${gitup}${hg} ${i}"
-	VERSTR="${VERINFO}\\n"
+	VERINFO="${VERSION}${git}"
 else
-	VERINFO="${VERSION} #${v}${svn}${git}${gitup}${hg}: ${t}"
-	VERSTR="${VERINFO}\\n    ${u}@${h}:${d}\\n"
+	VERINFO="${VERSION}${git}"
 fi
+
+VERSTR="${VERINFO}\\n"
 
 vers_content_new=$(cat << EOF
 $COPYRIGHT
@@ -317,7 +322,7 @@ EOF
 )
 vers_content_old=$(cat vers.c 2>/dev/null || true)
 if [ "$vers_content_new" != "$vers_content_old" ]; then
-	printf "%s\n" "$vers_content_new" > vers.c
+	printf "%s" "$vers_content_new" > vers.c
 fi
 
 echo $((v + 1)) > version
