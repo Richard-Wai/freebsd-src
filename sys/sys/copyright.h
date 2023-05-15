@@ -1,6 +1,7 @@
 /*-
  * SPDX-License-Identifier: BSD-2-Clause
  *
+ * Copyright (C) 2019-2024 ANNEXI-STRAYLINE Inc. All rights reserved.
  * Copyright (C) 1992-2023 The FreeBSD Project. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,22 +29,17 @@
 /* Copyrights macros  */
 
 /* Add a FreeBSD vendor copyright here - or via CFLAGS */
-#ifndef COPYRIGHT_Vendor
+
 #define	COPYRIGHT_Vendor \
-	""
-#endif
+	"Copyright (c) 2019-2024 ANNEXI-STRAYLINE Inc.\n"
 
 /* FreeBSD */
 #define COPYRIGHT_FreeBSD \
 	"Copyright (c) 1992-2023 The FreeBSD Project.\n"
 
-/* Foundation */
-#define	TRADEMARK_Foundation \
-	"FreeBSD is a registered trademark of The FreeBSD Foundation.\n"
-
 /* Berkeley */
 #define COPYRIGHT_UCB \
-	"Copyright (c) 1979, 1980, 1983, 1986, 1988, 1989, 1991, 1992, 1993, 1994\n\tThe Regents of the University of California. All rights reserved.\n"
+	"Copyright (c) 1979, 1980, 1983, 1986, 1988, 1989, 1991, 1992, 1993, 1994\n\tThe Regents of the University of California. All rights reserved.\n\n\n"
 
 char copyright[] = COPYRIGHT_Vendor COPYRIGHT_FreeBSD COPYRIGHT_UCB;
-char trademark[] = TRADEMARK_Foundation;
+
