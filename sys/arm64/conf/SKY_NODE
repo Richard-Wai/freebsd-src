@@ -200,7 +200,7 @@ dtb/rpi \
 usb/ucom usb/uftdi usb/umodem usb/template usb/quirk usb/umass usb/cfumass usb/dwc_otg \
 ctl iscsi cfiscsi nvd nvme \
 zfs xdr unionfs cd9660 libiconv cd9660_iconv msdosfs_iconv udf_iconv \
-if_vlan if_tuntap if_gif if_gre if_vxlan if_bridge if_enc if_wg \
+if_vlan if_tuntap if_gif if_gre if_vxlan if_bridge bridgestp if_enc if_wg \
 pf \
 nfsd nfslockd acl_nfs4 acl_posix1e \
 mac_priority \
