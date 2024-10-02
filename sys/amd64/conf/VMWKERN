@@ -169,7 +169,7 @@ device      enc             # IPSEC filtering
 device		firmware		# firmware assist module
 device      wg
 device      xz
-device      zstd
+#device      zstd
 
 # The `bpf' device enables the Berkeley Packet Filter.
 # Be aware of the administrative consequences of enabling this!
