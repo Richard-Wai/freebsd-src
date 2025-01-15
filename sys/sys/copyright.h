@@ -31,11 +31,11 @@
 /* Add a FreeBSD vendor copyright here - or via CFLAGS */
 
 #define	COPYRIGHT_Vendor \
-	"Copyright (c) 2019-2024 ANNEXI-STRAYLINE Inc.\n"
+	"Copyright (c) 2019-2025 ANNEXI-STRAYLINE Inc.\n"
 
 /* FreeBSD */
 #define COPYRIGHT_FreeBSD \
-	"Copyright (c) 1992-2023 The FreeBSD Project.\n"
+	"Copyright (c) 1992-2025 The FreeBSD Project.\n"
 
 /* Berkeley */
 #define COPYRIGHT_UCB \
