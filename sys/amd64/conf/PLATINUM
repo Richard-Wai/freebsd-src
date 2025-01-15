@@ -20,7 +20,6 @@
 machine     amd64
 cpu         HAMMER
 ident		PLATINUM
-hints       GENERIC.hints
 
 options 	BOOT_TAG=\"\"
 options 	BOOT_TAG_SZ=0
